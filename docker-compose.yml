@@ -6,14 +6,34 @@ services:
       dockerfile: Dockerfile
     container_name: flightBookingBackendSvc
     env_file: .env
-    # depends_on:
-    #   - mysql
+    depends_on:
+      - postgres
     expose:
       - "8000"
     ports:
       - 8000:8000
     volumes:
       - ./backendSvc:/usr/local/app/
-    # networks:
-    #   - composedevenv_fbsnet
+    networks:
+      - composedevenv_fbsnet
     command: python manage.py runserver 0.0.0.0:8000
+
+  postgres:
+    image: postgres:18.0-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - composedevenv_fbsnet
+
+networks:
+  composedevenv_fbsnet:
+    name: composedevenv_fbsnet
+    driver: bridge
+
+volumes:
+  pgdata:
