@@ -6,6 +6,9 @@ services:
       dockerfile: Dockerfile
     container_name: flightBookingBackendSvc
     env_file: .env
+    # depends_on:
+    #   postgres:
+    #     condition: service_healthy
     depends_on:
       - postgres
     expose:
@@ -29,6 +32,12 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - composedevenv_fbsnet
+
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+    #   interval: 2s
+    #   retries: 10
+    #   timeout: 5s
 
 networks:
   composedevenv_fbsnet:
