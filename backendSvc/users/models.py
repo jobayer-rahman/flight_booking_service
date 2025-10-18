@@ -21,3 +21,6 @@ class User(AbstractUser):
         if self.is_superuser:
             self.role = self.Roles.ADMIN
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.username
