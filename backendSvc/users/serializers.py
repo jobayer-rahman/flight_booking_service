@@ -1,4 +1,5 @@
 from .models import User
+from .utils import get_token
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
@@ -32,7 +33,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
-
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -42,9 +42,11 @@ class TokenResponseSerializer(serializers.Serializer):
     token_type = serializers.CharField()
     refresh_token = serializers.CharField()
     access_token = serializers.CharField()
-    access_token_expiration = serializers.IntegerField()
-    user = UserInfoSerializer()
+    expiration = serializers.IntegerField()
 
+class LoginResponseSerializer(serializers.Serializer):
+    token = TokenResponseSerializer()
+    user = UserInfoSerializer()
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -62,21 +64,22 @@ class LoginSerializer(serializers.Serializer):
         if user.is_banned:
             raise serializers.ValidationError("User is banned.")
 
-        refresh_token = RefreshToken.for_user(user)
-        access_token = refresh_token.access_token
-        token_lifetime = api_settings.ACCESS_TOKEN_LIFETIME
-        expires_in = int(token_lifetime.total_seconds())
-
+        token = get_token(user=user)
         response_data = {
-            'token_type': 'Bearer',
-            'refresh_token': str(refresh_token),
-            'access_token': str(access_token),
-            'access_token_expiration': expires_in,
+            'token': token,
             'user': user,
         }
-        token_response = TokenResponseSerializer(instance=response_data)
+        token_response = LoginResponseSerializer(instance=response_data)
         return token_response.data
 
+class RefreshTokenSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField()
+
+    def validate(self, attrs):
+        refresh_token = attrs["refresh_token"]
+        token = get_token(refresh_token_str=refresh_token)
+        token_data = TokenResponseSerializer(instance=token)
+        return token_data.data
 
 class UserLogoutSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
