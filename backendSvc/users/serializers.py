@@ -2,6 +2,7 @@ from .models import User
 from .utils import get_token
 from django.contrib.auth import authenticate
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.settings import api_settings
 
@@ -72,14 +73,22 @@ class LoginSerializer(serializers.Serializer):
         token_response = LoginResponseSerializer(instance=response_data)
         return token_response.data
 
-class RefreshTokenSerializer(serializers.Serializer):
+class RefreshTokenSerializer(TokenRefreshSerializer):
     refresh_token = serializers.CharField()
+    refresh = None
 
     def validate(self, attrs):
-        refresh_token = attrs["refresh_token"]
-        token = get_token(refresh_token_str=refresh_token)
-        token_data = TokenResponseSerializer(instance=token)
-        return token_data.data
+        attrs['refresh'] = attrs.pop('refresh_token')
+        data = super().validate(attrs)
+
+        data = {
+            "token_type": "Bearer",
+            "access_token": data["access"],
+            "refresh_token": data["refresh"],  # This will be rotated if enabled
+            "expiration": int(self.token_class(data["refresh"]).access_token.lifetime.total_seconds())
+        }
+        response_data = TokenResponseSerializer(instance=data)
+        return response_data.data
 
 class UserLogoutSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
