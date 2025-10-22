@@ -3,7 +3,7 @@ from .views import (
     RefreshTokenAPIView,
     UserRegisterView,
     UserLoginAPIView,
-    UserLogoutAPIView
+    UserLogoutAPIView,
 )
 
 
