@@ -16,6 +16,14 @@ class UserFactory(DjangoModelFactory):
     def username(self):
         return uuid4().hex[:20]
 
+    @factory.post_generation
+    def password(self, create, extracted, **kwargs):
+        if not create:
+            return
+        password = extracted #  or "defaultpassword123"
+        self.set_password(password)
+        self.save()
+
 class SuperUserFactory(UserFactory):
     is_staff = True
     is_superuser = True
