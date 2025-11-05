@@ -98,7 +98,7 @@ class UserLogoutSerializer(serializers.Serializer):
         try:
             self.refresh_token = RefreshToken(self.token)
         except TokenError:
-            raise serializers.ValidationError("Invalid or expired token.")
+            raise serializers.ValidationError({"detail": "Invalid or expired token."})
         return attrs
 
     def save(self, **kwargs):
