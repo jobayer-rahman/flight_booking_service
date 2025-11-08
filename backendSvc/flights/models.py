@@ -44,9 +44,9 @@ class Airline(BaseModel):
 class Flight(BaseModel):
     flight_number = models.CharField(max_length=10, unique=True)
     airline = models.ForeignKey(Airline, related_name='flights', on_delete=models.CASCADE)
-    deprature = models.ForeignKey(Airport, related_name='departures', on_delete=models.CASCADE)
+    departure = models.ForeignKey(Airport, related_name='departures', on_delete=models.CASCADE)
     arrival = models.ForeignKey(Airport, related_name='arrivals', on_delete=models.CASCADE)
-    deprature_time = models.DateTimeField()
+    departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     total_seats = models.PositiveIntegerField(default=100)
