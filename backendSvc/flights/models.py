@@ -52,6 +52,10 @@ class Flight(BaseModel):
     total_seats = models.PositiveIntegerField(default=100)
     available_seats = models.PositiveIntegerField(default=100)
 
+    def __str__(self):
+        return f"{self.flight_number} -- {self.airline.name}"
+
+
 class Booking(BaseModel):
     class Status(models.TextChoices):
         CONFIRMED = "confirmed", "Confirmed"
@@ -63,11 +67,30 @@ class Booking(BaseModel):
     seats_booked = models.PositiveSmallIntegerField(default=1)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=15, choices=Status.choices, default=Status.PENDING)
-    
+
     class Meta:
         unique_together = ('user', 'flight')
-    
+
     def __str__(self):
         return f"{self.user} -- {self.flight.flight_number}"
+
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+    phone_no = models.CharField(max_length=15)
+    bio = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
     
-    
+    def __str__(self):
+        return self.name
+
+
+class Book(models.Model):
+    title = models.CharField(max_length=150)
+    author = models.ForeignKey(Author, related_name="books", on_delete=models.CASCADE)
+    published_date = models.DateTimeField(auto_now=True)
+    is_available = models.BooleanField(default=True)
+    number_of_copies = models.IntegerField(default=100)
+
+    def __str__(self):
+        return self.title
