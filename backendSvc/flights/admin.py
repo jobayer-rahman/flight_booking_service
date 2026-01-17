@@ -6,6 +6,8 @@ from .models import (
     City,
     Country,
     Flight,
+    Author,
+    Book
 )
 
 
@@ -15,3 +17,5 @@ admin.site.register(Booking)
 admin.site.register(City)
 admin.site.register(Country)
 admin.site.register(Flight)
+admin.site.register(Author)
+admin.site.register(Book)
